@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:spring="http://www.mulesoft.org/schema/mule/spring" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/spring http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2668b486-004f-4de6-a94d-5e7cc3bedf84" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<spring:config name="Spring_Config" doc:name="Spring Config" doc:id="1e820ae0-2c31-4f59-95e8-7c26a98729e9" files="springbeans.xml" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="a26fc68f-6f0c-41e2-b04a-c4f82d1fcb72" >
+		<db:generic-connection url="jdbc:derby:memory:demodb" driverClassName="org.apache.derby.jdbc.EmbeddedDriver"/>
+	</db:config>
+	<flow name="derbydb-mule4Flow" doc:id="9d0822eb-199f-41e5-a79c-aa0795c8ae5e" >
+		<http:listener doc:name="Listener" doc:id="f1940f2b-8436-4cf2-90e7-144d9a6f845d" config-ref="HTTP_Listener_config" path="/customers"/>
+		<db:select doc:name="Select" doc:id="59fd72a5-df53-4510-9e19-0f1a52c50914" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from demodb.customers ]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="5b97e314-f347-4614-b635-f6daa5381344" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
